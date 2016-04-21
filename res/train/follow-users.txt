@@ -1,0 +1,8 @@
+I would like to follow some <START:person> users <END>
+Can you recommend me some <START:person> users <END> I can follow
+Can you recommend me <START:person> people <END> I can follow
+Please name some <START:person> people <END> I can follow
+I would like to find some <START:person> people <END> <START:person> who <END> post stuff I would like to read
+Are there any <START:person> users <END> I can start following
+<START:person> Who <END> should I follow
+<START:person> Who <END> to follow

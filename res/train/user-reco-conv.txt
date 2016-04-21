@@ -1,0 +1,6 @@
+<START:person> who <END> should I add to this <START:conversation> conversation <END>
+Recommend me the best <START:person> person <END> to add to this <START:conversation> conversation <END>
+<START:person> who <END> do you think we should invite to this <START:conversation> discussion <END>
+<START:person> who <END> to add to this <START:conversation> conversation <END>
+Suggest some <START:person> people <END> I can add to this <START:conversation> thread <END>
+Suggest some <START:person> people <END> I can invite to this <START:conversation> discussion <END>

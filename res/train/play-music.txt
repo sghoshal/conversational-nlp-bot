@@ -1,0 +1,9 @@
+Can you play <START:artist> Beatles <END>
+I would like to listen to <START:artist> Pearl Jam <END>
+Play <START:song> Hotel California <END> by <START:artist> Eagles <END>
+Can you play <START:artist> Beatles <END>
+I would like to listen to <START:artist> Pearl Jam <END>
+Play <START:song> Hotel California <END> by <START:artist> Eagles <END>
+Can you play <START:artist> Beatles <END>
+I would like to listen to <START:artist> Pearl Jam <END>
+Play <START:song> Hotel California <END> by <START:artist> Eagles <END>

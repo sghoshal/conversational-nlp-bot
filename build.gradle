@@ -1,0 +1,35 @@
+apply plugin: 'java'
+
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+//    compile 'org.apache.opennlp:opennlp-tools:1.5.2-incubating'
+    compile files('libs/opennlp-tools-1.5.3.jar', 'libs/opennlp-maxent-3.0.2-incubating.jar', 'libs/commons-io-2.4/commons-io-2.4.jar')
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'XNLPMain'
+    }
+}
+
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'NLP module for OSN.',
+                'Implementation-Version': version,
+                'Main-Class': 'main.java.osn.XNLPMain'
+    }
+    baseName = project.name + '-dev'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+task runJar(type: JavaExec) {
+    main = "main.java.osn.XNLPMain"
+    classpath = sourceSets.main.runtimeClasspath
+}
