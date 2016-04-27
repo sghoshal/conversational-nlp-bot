@@ -10,6 +10,13 @@ public class XEntity
 
     private String action;
 
+    public XEntity( String entity, boolean isRequired, String entityId )
+    {
+        this.entity = entity;
+        this.isRequired = isRequired;
+        this.entityId = entityId;
+    }
+
     public void setEntity( String entity )
     {
         this.entity = entity;
