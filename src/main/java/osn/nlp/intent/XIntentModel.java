@@ -13,8 +13,10 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class XIntentModule implements XNLPModel
+public class XIntentModel implements XNLPModel
 {
+	private static final String TRAINED_MODEL_FILE = "doccat-intent-model.bin";
+
 	private DoccatModel doccatModel;
 	private DocumentCategorizerME docCategorizer;
 
@@ -61,7 +63,7 @@ public class XIntentModule implements XNLPModel
 
 		try
 		{
-			doccatModelOut = new BufferedOutputStream( new FileOutputStream( XNLPModule.TRAINED_MODEL_PATH ) );
+			doccatModelOut = new BufferedOutputStream( new FileOutputStream( XNLPModule.TRAINED_MODEL_DIR + "/" + TRAINED_MODEL_FILE ) );
 			doccatModel.serialize( doccatModelOut );
 		}
 		catch ( IOException e )
@@ -90,7 +92,7 @@ public class XIntentModule implements XNLPModel
 	public DoccatModel readExistingModel() throws IOException
 	{
 		DoccatModel model = null;
-		InputStream doccatModelIn = new FileInputStream( XNLPModule.TRAINED_MODEL_PATH );
+		InputStream doccatModelIn = new FileInputStream( XNLPModule.TRAINED_MODEL_DIR + "/" + TRAINED_MODEL_FILE );
 
 		if ( doccatModelIn != null )
 		{
@@ -106,8 +108,7 @@ public class XIntentModule implements XNLPModel
 		DoccatModel existingModel = readExistingModel();
 
 		this.doccatModel = ( existingModel != null ) ? existingModel : this.doccatModel;
-
-		docCategorizer = new DocumentCategorizerME( doccatModel );
+		this.docCategorizer = new DocumentCategorizerME( doccatModel );
 	}
 
 	public DoccatModel getModel()

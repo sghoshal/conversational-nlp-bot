@@ -2,8 +2,8 @@ package main.java.osn.nlp;
 
 import main.java.osn.info.XClassificationInfo;
 import main.java.osn.nlp.entity.XEntity;
-import main.java.osn.nlp.entity.XEntityModule;
-import main.java.osn.nlp.intent.XIntentModule;
+import main.java.osn.nlp.entity.XEntityModel;
+import main.java.osn.nlp.intent.XIntentModel;
 import opennlp.tools.doccat.DocumentCategorizerME;
 import opennlp.tools.namefind.NameFinderME;
 import opennlp.tools.tokenize.WhitespaceTokenizer;
@@ -19,22 +19,22 @@ public class XNLPModule
 {
 	private static XNLPModule instance = null;
 
-	private XIntentModule intentModule;
-	private XEntityModule entityModule;
+	private XIntentModel intentModel;
+	private XEntityModel entityModel;
 
 	private Map<String, XEntity> intentRequiredEntities;
 	private String trainingDirectoryPath;
 
 	public static final String TRAINING_DATA_DIR = "res/train";
-	public static final String TRAINED_MODEL_PATH = "models/trained/doccat-trained.bin";
+	public static final String TRAINED_MODEL_DIR = "models/trained";
 
 	// Prevent instantiation from outside this class.
 	private XNLPModule()
 	{
 		intentRequiredEntities = new HashMap<String, XEntity>();
 
-		this.intentModule = new XIntentModule();
-		this.entityModule = new XEntityModule();
+		this.intentModel = new XIntentModel();
+		this.entityModel = new XEntityModel();
 	}
 
 	public static XNLPModule getInstance()
@@ -68,13 +68,13 @@ public class XNLPModule
 	{
 		XClassificationInfo retVal = new XClassificationInfo();
 
-		DocumentCategorizerME categorizer = intentModule.getCateogorizer();
+		DocumentCategorizerME categorizer = intentModel.getCateogorizer();
 
 		double[] outcome = categorizer.categorize(input);
 		retVal.intent = categorizer.getBestCategory( outcome );
 		System.out.print("action=" + retVal.intent + " args={ ");
 
-		NameFinderME nameFinder = entityModule.getNameFinder();
+		NameFinderME nameFinder = entityModel.getNameFinder();
 
 		String[] tokens = WhitespaceTokenizer.INSTANCE.tokenize(input);
 		Span[] spans = nameFinder.find( tokens );
@@ -95,8 +95,8 @@ public class XNLPModule
 
 	private void trainModelsAndCreateMappings( File trainingDirectory ) throws IOException
 	{
-		intentModule.train( trainingDirectory );
-		entityModule.train( trainingDirectory );
+		intentModel.train( trainingDirectory );
+		entityModel.train( trainingDirectory );
 
 		createRequiredEntityMapping( trainingDirectory );
 	}

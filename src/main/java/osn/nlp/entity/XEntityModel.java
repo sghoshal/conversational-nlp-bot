@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class XEntityModule implements XNLPModel {
-
+public class XEntityModel implements XNLPModel
+{
 	private NameFinderME nameFinder;
 	private TokenNameFinderModel tokenNameFinderModel;
 
