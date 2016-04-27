@@ -12,7 +12,7 @@ public class XNLPMain {
 
 		try
 		{
-			nlpModule.trainWithInputFile( "res/train" );
+			nlpModule.train( "res/train" );
 		}
 		catch (IOException e)
 		{
@@ -25,6 +25,8 @@ public class XNLPMain {
 		nlpModule.classifySentence("Any people I can follow");
 
 		// Add intents
+
+		nlpModule.classifySentence("I want to hear songs by Pearl Jam");
 
 		String playMusicIntent = "play-music";
 		List<String> playMusicSentences = new ArrayList<String>();

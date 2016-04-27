@@ -25,20 +25,20 @@ public class XEntityModule implements XNLPModel {
 
 	public void train() throws IOException
 	{
-		train(XNLPModule.TRAINING_DATA_DIR );
-	}
+		System.out.println( "Path to training data: " + XNLPModule.TRAINING_DATA_DIR );
 
-	@Override
-	public void train( String pathToTrainingData ) throws IOException {
-		System.out.println( "Path to training data: " + pathToTrainingData );
-
-		File trainingDirectory = new File( pathToTrainingData );
+		File trainingDirectory = new File( XNLPModule.TRAINING_DATA_DIR );
 
 		if ( !trainingDirectory.isDirectory() )
 		{
 			throw new IllegalArgumentException( "TrainingDirectory is not a directory: " + trainingDirectory.getAbsolutePath() );
 		}
 
+		train( trainingDirectory );
+	}
+
+	@Override
+	public void train( File trainingDirectory ) throws IOException {
 		List<ObjectStream<NameSample>> nameStreams = new ArrayList<ObjectStream<NameSample>>();
 
 		for ( File trainingFile : trainingDirectory.listFiles() )
@@ -51,7 +51,7 @@ public class XEntityModule implements XNLPModel {
 			nameStreams.add( nameSampleStream );
 		}
 
-		ObjectStream<NameSample> combinedNameSampleStream = ObjectStreamUtils.createObjectStream( nameStreams.toArray( new ObjectStream[0] ) );
+		ObjectStream<NameSample> combinedNameSampleStream = ObjectStreamUtils.createObjectStream( nameStreams.toArray( new ObjectStream[ 0 ] ) );
 
 		this.tokenNameFinderModel = NameFinderME.train( "en", null, combinedNameSampleStream, TrainingParameters.defaultParams(),
 																		(AdaptiveFeatureGenerator) null, Collections.<String, Object>emptyMap() );
