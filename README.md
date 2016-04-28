@@ -1,4 +1,6 @@
 # osn-nlp
+Work in Progress:
+
 Trainable NLP library that offers conversational interaction.
 
 The underlying NLP engine used is OpenNLP.
