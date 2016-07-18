@@ -26,34 +26,34 @@ public class XIntentModel implements XNLPModel
 
 		File trainingDirectory = new File( XNLPModule.TRAINING_DATA_DIR );
 
-		if ( !trainingDirectory.isDirectory() )
+		if (!trainingDirectory.isDirectory())
 		{
-			throw new IllegalArgumentException( "TrainingDirectory is not a directory: " + trainingDirectory.getAbsolutePath() );
+			throw new IllegalArgumentException("TrainingDirectory is not a directory: " + trainingDirectory.getAbsolutePath());
 		}
 
-		train( trainingDirectory );
+		train(trainingDirectory);
 	}
 
 	@Override
-	public void train( File trainingDirectory ) throws IOException
+	public void train(File trainingDirectory) throws IOException
 	{
 		List<ObjectStream<DocumentSample>> categoryStreams = new ArrayList<ObjectStream<DocumentSample>>();
 
-		for ( File trainingFile : trainingDirectory.listFiles() )
+		for (File trainingFile : trainingDirectory.listFiles())
 		{
 			String intent = trainingFile.getName().replaceFirst("[.][^.]+$", "");
-			ObjectStream<String> lineStream = new PlainTextByLineStream( new FileInputStream(trainingFile), "UTF-8" );
+			ObjectStream<String> lineStream = new PlainTextByLineStream(new FileInputStream(trainingFile), "UTF-8");
 
-			ObjectStream<DocumentSample> documentSampleStream = new IntentDocumentSampleStream( intent, lineStream );
-			categoryStreams.add( documentSampleStream );
+			ObjectStream<DocumentSample> documentSampleStream = new IntentDocumentSampleStream(intent, lineStream);
+			categoryStreams.add(documentSampleStream);
 		}
 
-		ObjectStream<DocumentSample> combinedDocumentSampleStream = ObjectStreamUtils.createObjectStream( categoryStreams.toArray( new ObjectStream[ 0 ] ) );
+		ObjectStream<DocumentSample> combinedDocumentSampleStream = ObjectStreamUtils.createObjectStream(categoryStreams.toArray(new ObjectStream[ 0 ]));
 
-		this.doccatModel = DocumentCategorizerME.train( "en", combinedDocumentSampleStream, 0, 100 );
+		this.doccatModel = DocumentCategorizerME.train("en", combinedDocumentSampleStream, 0, 100);
 		combinedDocumentSampleStream.close();
 
-		this.docCategorizer = new DocumentCategorizerME( doccatModel );
+		this.docCategorizer = new DocumentCategorizerME(doccatModel);
 	}
 
 	@Override
@@ -63,17 +63,17 @@ public class XIntentModel implements XNLPModel
 
 		try
 		{
-			doccatModelOut = new BufferedOutputStream( new FileOutputStream( XNLPModule.TRAINED_MODEL_DIR + "/" + TRAINED_MODEL_FILE ) );
-			doccatModel.serialize( doccatModelOut );
+			doccatModelOut = new BufferedOutputStream(new FileOutputStream( XNLPModule.TRAINED_MODEL_DIR + "/" + TRAINED_MODEL_FILE ));
+			doccatModel.serialize(doccatModelOut);
 		}
-		catch ( IOException e )
+		catch (IOException e)
 		{
 			e.printStackTrace();
-			throw new RuntimeException( "Could not serialize trained model to file system." );
+			throw new RuntimeException("Could not serialize trained model to file system.");
 		}
 		finally
 		{
-			if ( doccatModelOut != null )
+			if (doccatModelOut != null)
 			{
 				try
 				{
@@ -82,7 +82,7 @@ public class XIntentModel implements XNLPModel
 				catch (IOException e)
 				{
 					e.printStackTrace();
-					throw new RuntimeException( "Could not close doccatModelOut stream." );
+					throw new RuntimeException("Could not close doccatModelOut stream.");
 				}
 			}
 		}
@@ -92,11 +92,11 @@ public class XIntentModel implements XNLPModel
 	public DoccatModel readExistingModel() throws IOException
 	{
 		DoccatModel model = null;
-		InputStream doccatModelIn = new FileInputStream( XNLPModule.TRAINED_MODEL_DIR + "/" + TRAINED_MODEL_FILE );
+		InputStream doccatModelIn = new FileInputStream(XNLPModule.TRAINED_MODEL_DIR + "/" + TRAINED_MODEL_FILE);
 
-		if ( doccatModelIn != null )
+		if (doccatModelIn != null)
 		{
-			model = new DoccatModel( doccatModelIn );
+			model = new DoccatModel(doccatModelIn);
 			doccatModelIn.close();
 		}
 
@@ -107,8 +107,8 @@ public class XIntentModel implements XNLPModel
 	{
 		DoccatModel existingModel = readExistingModel();
 
-		this.doccatModel = ( existingModel != null ) ? existingModel : this.doccatModel;
-		this.docCategorizer = new DocumentCategorizerME( doccatModel );
+		this.doccatModel = (existingModel != null) ? existingModel : this.doccatModel;
+		this.docCategorizer = new DocumentCategorizerME(doccatModel);
 	}
 
 	public DoccatModel getModel()
@@ -116,7 +116,7 @@ public class XIntentModel implements XNLPModel
 		return doccatModel;
 	}
 
-	public DocumentCategorizerME getCateogorizer()
+	public DocumentCategorizerME getCategorizer()
 	{
 		return docCategorizer;
 	}

@@ -56,4 +56,36 @@ public class XEntity
     {
         return action;
     }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if ( this == o ) {
+            return true;
+        }
+        if ( ( o == null ) || ( getClass() != o.getClass() ) )
+        {
+            return false;
+        }
+
+        XEntity entity = (XEntity) o;
+
+        return entityId.equals(entity.entityId);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return entityId.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "XEntity{" +
+                "entity='" + entity + '\'' +
+                ", isRequired=" + isRequired +
+                ", entityId='" + entityId + '\'' +
+                ", action='" + action + '\'' +
+                '}';
+    }
 }

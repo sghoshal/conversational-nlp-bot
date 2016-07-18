@@ -1,18 +1,24 @@
 package main.java.osn;
 
 import main.java.osn.nlp.XNLPModule;
+import main.java.osn.nlp.entity.XEntity;
+import main.java.osn.nlp.intent.XIntent;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class XNLPMain {
-	public static void main( String[] args ) {
+public class XNLPMain
+{
+	public static void main( String[] args )
+	{
 		XNLPModule nlpModule = XNLPModule.getInstance();
 
 		try
 		{
-			nlpModule.train( "res/train" );
+			nlpModule.train("res/train");
 		}
 		catch (IOException e)
 		{
@@ -28,7 +34,8 @@ public class XNLPMain {
 
 		nlpModule.classifySentence("I want to hear songs by Pearl Jam");
 
-		String playMusicIntent = "play-music";
+		XIntent playMusicIntent = new XIntent( "play-music" );
+
 		List<String> playMusicSentences = new ArrayList<String>();
 
 		playMusicSentences.add( "Can you play <START:artist> Beatles <END>" );
@@ -45,5 +52,13 @@ public class XNLPMain {
 		}
 
 		nlpModule.classifySentence("I want to hear songs by Pearl Jam");
+
+		Map<XIntent, Set<XEntity>> intentEntitiesMap = nlpModule.getIntentRequiredEntities();
+
+		for ( XIntent xi : intentEntitiesMap.keySet() )
+		{
+			Set<XEntity> eSet = intentEntitiesMap.get( xi );
+			System.out.println( String.format( "[%s -> [%s]", xi, eSet ) );
+		}
 	}
 }
