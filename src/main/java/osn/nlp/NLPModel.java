@@ -5,9 +5,8 @@ import opennlp.tools.doccat.DoccatModel;
 import java.io.File;
 import java.io.IOException;
 
-public interface XNLPModel
-{
-	void train( File trainingDirectory ) throws IOException;
+public interface NLPModel {
+	void train(File trainingDirectory) throws IOException;
 
 	void writeModel();
 

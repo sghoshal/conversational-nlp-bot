@@ -7,77 +7,65 @@ import opennlp.tools.util.ObjectStream;
 import java.io.IOException;
 import java.util.Vector;
 
-public class IntentDocumentSampleStream implements ObjectStream<DocumentSample>
-{
-    private String category;
-    private ObjectStream<String> stream;
+public class IntentDocumentSampleStream implements ObjectStream<DocumentSample> {
+	private String category;
+	private ObjectStream<String> stream;
 
-    public IntentDocumentSampleStream(String category, ObjectStream<String> stream)
-    {
-        this.category = category;
-        this.stream = stream;
-    }
+	public IntentDocumentSampleStream(String category, ObjectStream<String> stream) {
+		this.category = category;
+		this.stream = stream;
+	}
 
-    @Override
-    public DocumentSample read() throws IOException
-    {
-        String sampleString = stream.read();
+	@Override
+	public DocumentSample read() throws IOException {
+		String sampleString = stream.read();
 
-        if (sampleString != null)
-        {
-            // Whitespace tokenize entire string
-            String[] tokens = WhitespaceTokenizer.INSTANCE.tokenize(sampleString);
+		if (sampleString != null) {
+			// Whitespace tokenize entire string
+			String[] tokens = WhitespaceTokenizer.INSTANCE.tokenize(sampleString);
 
-            //remove entities
-            Vector<String> vector = new Vector<String>(tokens.length);
-            boolean skip = false;
+			//remove entities
+			Vector<String> vector = new Vector<String>(tokens.length);
+			boolean skip = false;
 
-            for (String token : tokens)
-            {
-                if (token.startsWith("<"))
-                {
-                    skip = !skip;
-                }
-                else if(!skip)
-                {
-                    System.out.println(token + " ");
-                    vector.add(token);
-                }
-            }
+			for (String token : tokens) {
+				if (token.startsWith("<")) {
+					skip = !skip;
+				}
+				else if(!skip) {
+					System.out.println(token + " ");
+					vector.add(token);
+				}
+			}
 
-            System.out.println();
+			System.out.println();
 
-            tokens = new String[vector.size()];
-            vector.copyInto(tokens);
+			tokens = new String[vector.size()];
+			vector.copyInto(tokens);
 
-            DocumentSample sample;
+			DocumentSample sample;
 
-            if ( tokens.length > 0 )
-            {
-                sample = new DocumentSample( category, tokens );
-            }
-            else
-            {
-                throw new IOException("Empty lines are not allowed!");
-            }
+			if (tokens.length > 0) {
+				sample = new DocumentSample(category, tokens);
+			}
+			else {
+				throw new IOException("Empty lines are not allowed!");
+			}
 
-            return sample;
-        }
-        else
-        {
-            return null;
-        }
-    }
+			return sample;
+		}
+		else {
+			return null;
+		}
+	}
 
-    @Override
-    public void reset() throws IOException, UnsupportedOperationException
-    {
-        stream.reset();
-    }
+	@Override
+	public void reset() throws IOException, UnsupportedOperationException {
+		stream.reset();
+	}
 
-    @Override
-    public void close() throws IOException
-    {
-        stream.close();
-    }
+	@Override
+	public void close() throws IOException {
+		stream.close();
+	}
 }

@@ -1,10 +1,10 @@
 package main.java.osn.nlp;
 
-import main.java.osn.info.XClassificationInfo;
-import main.java.osn.nlp.entity.XEntity;
-import main.java.osn.nlp.entity.XEntityModel;
-import main.java.osn.nlp.intent.XIntent;
-import main.java.osn.nlp.intent.XIntentModel;
+import main.java.osn.info.ClassificationInfo;
+import main.java.osn.nlp.entity.Entity;
+import main.java.osn.nlp.entity.EntityModel;
+import main.java.osn.nlp.intent.Intent;
+import main.java.osn.nlp.intent.IntentModel;
 import opennlp.tools.doccat.DocumentCategorizerME;
 import opennlp.tools.namefind.NameFinderME;
 import opennlp.tools.tokenize.WhitespaceTokenizer;
@@ -16,48 +16,42 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class XNLPModule
-{
+public class NLPModule {
 	public static final String TRAINING_DATA_DIR = "res/train";
 	public static final String TRAINED_MODEL_DIR = "models/trained";
 	private static final Pattern START_TAG_PATTERN = Pattern.compile("<START(:([^:>\\s]*))?>");
 	private static final String END_TAG = "<END>";
 
-	private static XNLPModule instance = null;
+	private static NLPModule instance = null;
 
-	private XIntentModel intentModel;
-	private XEntityModel entityModel;
+	private IntentModel intentModel;
+	private EntityModel entityModel;
 
-	private Map<XIntent, Set<XEntity>> intentRequiredEntities;
+	private Map<Intent, Set<Entity>> intentRequiredEntities;
 	private String trainingDirectoryPath;
 
 	// Prevent instantiation from outside this class.
-	private XNLPModule()
-	{
-		intentRequiredEntities = new HashMap<XIntent, Set<XEntity>>();
+	private NLPModule() {
+		intentRequiredEntities = new HashMap<Intent, Set<Entity>>();
 
-		this.intentModel = new XIntentModel();
-		this.entityModel = new XEntityModel();
+		this.intentModel = new IntentModel();
+		this.entityModel = new EntityModel();
 	}
 
-	public static XNLPModule getInstance()
-	{
-		if (instance == null)
-		{
-			instance = new XNLPModule();
+	public static NLPModule getInstance() {
+		if (instance == null) {
+			instance = new NLPModule();
 		}
 
 		return instance;
 	}
 
-	public void train(String trainingDirectoryPath) throws IOException
-	{
+	public void train(String trainingDirectoryPath) throws IOException {
 		System.out.println("Path to training data: " + trainingDirectoryPath);
 
 		File trainingDirectory = new File(trainingDirectoryPath);
 
-		if (!trainingDirectory.isDirectory())
-		{
+		if (!trainingDirectory.isDirectory()) {
 			throw new IllegalArgumentException("TrainingDirectory is not a directory: " + trainingDirectory.getAbsolutePath());
 		}
 
@@ -67,9 +61,8 @@ public class XNLPModule
 		System.out.println("Training complete. Ready.");
 	}
 
-	public XClassificationInfo classifySentence(String input)
-	{
-		XClassificationInfo retVal = new XClassificationInfo();
+	public ClassificationInfo classifySentence(String input) {
+		ClassificationInfo retVal = new ClassificationInfo();
 
 		DocumentCategorizerME categorizer = intentModel.getCategorizer();
 
@@ -84,8 +77,7 @@ public class XNLPModule
 		Span[] spans = nameFinder.find(tokens);
 		String[] names = Span.spansToStrings(spans, tokens);
 
-		for (int i = 0; i < spans.length; i++)
-		{
+		for (int i = 0; i < spans.length; i++) {
 			System.out.print(spans[i].getType() + ": " + names[i] + " ");
 			retVal.entities.add(names[i]);
 		}
@@ -97,72 +89,60 @@ public class XNLPModule
 		return retVal;
 	}
 
-	private void trainModelsAndCreateMappings(File trainingDirectory) throws IOException
-	{
+	private void trainModelsAndCreateMappings(File trainingDirectory) throws IOException {
 		intentModel.train(trainingDirectory);
 		entityModel.train(trainingDirectory);
 
 		createRequiredEntityMapping(trainingDirectory);
 	}
 
-	private void createRequiredEntityMapping(File trainingDirectory) throws IOException
-	{
+	private void createRequiredEntityMapping(File trainingDirectory) throws IOException {
 		FileReader fileReader = null;
 		BufferedReader br = null;
 
-		for (File trainingFile : trainingDirectory.listFiles())
-		{
+		for (File trainingFile : trainingDirectory.listFiles()) {
 			String intentStr = trainingFile.getName().replaceFirst("[.][^.]+$", "");
-			XIntent intent = new XIntent(intentStr, "Sure!");
+			Intent intent = new Intent(intentStr, "Sure!");
 
-			Set<XEntity> intentEntities = new LinkedHashSet<XEntity>();			// Need to remember order of insertion.
+			Set<Entity> intentEntities = new LinkedHashSet<Entity>();			// Need to remember order of insertion.
 
-			try
-			{
+			try {
 				fileReader = new FileReader(trainingFile);
 				br = new BufferedReader(fileReader);
 
 				String line;
 
-				while ((line = br.readLine()) != null)
-				{
-					List<XEntity> entitiesInSentence = parseEntities(line);
+				while ((line = br.readLine()) != null) {
+					List<Entity> entitiesInSentence = parseEntities(line);
 					intentEntities.addAll(entitiesInSentence);
 				}
 			}
-			catch (IOException e)
-			{
+			catch (IOException e) {
 				throw new IOException(e);
 			}
-			finally
-			{
+			finally {
 				if (fileReader != null) fileReader.close();
 				if (br != null) br.close();
 			}
 
-			if (intentRequiredEntities.containsKey(intent))
-			{
+			if (intentRequiredEntities.containsKey(intent)) {
 				 intentRequiredEntities.get(intent).addAll(intentEntities);
 			}
-			else
-			{
+			else {
 				intentRequiredEntities.put(intent, intentEntities);
 			}
 		}
 	}
 
-	public void addTrainingData(XIntent intent, List<String> trainingSentences) throws IOException
-	{
+	public void addTrainingData(Intent intent, List<String> trainingSentences) throws IOException {
 		saveNewTrainingData(intent, trainingSentences);
 		train(this.trainingDirectoryPath);
 	}
 
-	private List<XEntity> parseEntities(String line) throws IOException
-	{
-		List<XEntity> result = new ArrayList<XEntity>();
+	private List<Entity> parseEntities(String line) throws IOException {
+		List<Entity> result = new ArrayList<Entity>();
 
-		if ((line == null) || (line.trim().isEmpty()))
-		{
+		if ((line == null) || (line.trim().isEmpty())) {
 			return result;
 		}
 
@@ -171,13 +151,10 @@ public class XNLPModule
 		String[] tokens = WhitespaceTokenizer.INSTANCE.tokenize(line);
 		boolean encounteredStartTag = false;
 
-		for (String token : tokens)
-		{
+		for (String token : tokens) {
 			Matcher startMatcher = START_TAG_PATTERN.matcher(token);
-			if (startMatcher.matches())
-			{
-				if (encounteredStartTag)
-				{
+			if (startMatcher.matches()) {
+				if (encounteredStartTag) {
 					throw new IOException("Encountered <START:*> again before closing the previous <START:*> tag");
 				}
 				encounteredStartTag = true;
@@ -185,10 +162,9 @@ public class XNLPModule
 				System.out.println(String.format("[Group0: %s\tGroup1: %s\tGroup2: %s]\n",
 									startMatcher.group(0), startMatcher.group(1), startMatcher.group(2)));
 
-				result.add(new XEntity(startMatcher.group(2), true, startMatcher.group(2) + "-id"));
+				result.add(new Entity(startMatcher.group(2), true, startMatcher.group(2) + "-id"));
 			}
-			else if (token.equals(END_TAG))
-			{
+			else if (token.equals(END_TAG)) {
 				encounteredStartTag = false;
 			}
 		}
@@ -196,11 +172,10 @@ public class XNLPModule
 		return result;
 	}
 
-	private void saveNewTrainingData(XIntent intent, List<String> trainingSentences) throws IOException {
+	private void saveNewTrainingData(Intent intent, List<String> trainingSentences) throws IOException {
 		File destFile = new File(TRAINING_DATA_DIR + "/" + intent.getIntent() + ".txt");
 
-		if (destFile.isDirectory())
-		{
+		if (destFile.isDirectory()) {
 			throw new RuntimeException("The destination file is a directory. Change intent argument. ");
 		}
 
@@ -208,8 +183,7 @@ public class XNLPModule
 
 		StringBuilder sb = new StringBuilder();
 
-		for (String sentence : trainingSentences)
-		{
+		for (String sentence : trainingSentences) {
 			sb.append(sentence);
 			sb.append("\n");
 		}
@@ -217,8 +191,7 @@ public class XNLPModule
 		FileUtils.writeStringToFile(destFile, sb.toString(), destFile.exists());
 	}
 
-	public Map<XIntent, Set<XEntity>> getIntentRequiredEntities()
-	{
+	public Map<Intent, Set<Entity>> getIntentRequiredEntities() {
 		return this.intentRequiredEntities;
 	}
 }
