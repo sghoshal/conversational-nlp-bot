@@ -32,9 +32,9 @@ public class ConvContextNode {
 		this.intent = intent;
 		this.entity = entity;
 		this.entityId = entityId;
-		this.isEntityPlainText = false;
 		this.reply = reply;
 
+		this.isEntityPlainText = false;
 		this.isAsked = false;
 		this.isAnswered = false;
 
@@ -57,11 +57,16 @@ public class ConvContextNode {
 		this.optionalDependencies.add(dep);
 	}
 
-	public static boolean isStringNotBlank(String input) {
-		return (input != null) && (!input.trim().isEmpty());
+	@Override
+	public String toString() {
+		String retval = String.format("[Intent: %s | Entity: %s | EntityID: %s | Reply: %s\n" +
+										"RequiredDependencies: %s | Optional Dependencies: %s\n" +
+										"IsAsked: %s | IsAnswered: %s]\n",
+										intent, entity, entityId, reply,
+										requiredDependencies, optionalDependencies,
+										isAsked, isAnswered);
+
+		return retval;
 	}
 
-	public static boolean isStringBlank(String input) {
-		return !isStringNotBlank(input);
-	}
 }

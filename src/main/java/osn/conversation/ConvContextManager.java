@@ -5,6 +5,7 @@ import java.util.List;
 
 import main.java.osn.info.ConvContextReplyInfo;
 import main.java.osn.nlp.NLPManager;
+import main.java.osn.utils.NLPUtils;
 
 public class ConvContextManager {
 	private ConvContextNode conversationRoot;
@@ -29,7 +30,7 @@ public class ConvContextManager {
 		ConvContextReplyInfo result = new ConvContextReplyInfo();
 		ConvContextNode intentNode = null;
 
-		if (ConvContextNode.isStringBlank(chatIntent)) {
+		if (NLPUtils.isStringBlank(chatIntent)) {
 			chatIntent = nlpManager.getIntentModel().classify(chatText);
 			intentNode = getIntentNode(chatIntent);
 
@@ -40,7 +41,7 @@ public class ConvContextManager {
 
 			intentNode = getIntentNode(chatIntent);
 
-			if (ConvContextNode.isStringNotBlank(entityIdToMatch)) {
+			if (NLPUtils.isStringNotBlank(entityIdToMatch)) {
 				List<String> classifiedEntities = nlpManager.getEntityModel().classify(chatText);
 
 				// If the entityId to be matched is an optional entity, then:
@@ -93,7 +94,7 @@ public class ConvContextManager {
 		return result;
 	}
 
-	public void closeChatContext() {
+	public void closeAllChatContextStates() {
 		closeChatContextHelper(conversationRoot);
 	}
 
@@ -123,7 +124,7 @@ public class ConvContextManager {
 	}
 
 	private ConvContextNode getIntentNode(String intentInput) {
-		if (ConvContextNode.isStringBlank(intentInput)) {
+		if (NLPUtils.isStringBlank(intentInput)) {
 			return null;
 		}
 
@@ -139,7 +140,6 @@ public class ConvContextManager {
 	}
 
 	/**
-	 *
 	 * @param intentNode
 	 * @return
 	 */
@@ -155,7 +155,7 @@ public class ConvContextManager {
 			entityNode.isAsked = true;
 			result = new ConvContextReplyInfo(intentNode.intent, entityNode.entityId, entityNode.reply);
 		}
-		else if (ConvContextNode.isStringNotBlank(intentNode.optionalEntityPrompt)) {
+		else if (NLPUtils.isStringNotBlank(intentNode.optionalEntityPrompt)) {
 			// If all the required entities have been asked, ask for optional entities if prompt present.
 
 			result = new ConvContextReplyInfo(intentNode.intent,
@@ -166,7 +166,8 @@ public class ConvContextManager {
 			// We have asked all the required and optional entities (if any).
 
 			result = new ConvContextReplyInfo(intentNode.intent, null, "Thanks for providing all the information!");
-			closeChatContext();
+			ConvContextNode rootIntentNode = getRootIntentNode(intentNode.intent);
+			closeChatContextHelper(rootIntentNode);
 		}
 
 		return result;
@@ -180,6 +181,23 @@ public class ConvContextManager {
 		for (ConvContextNode reqDep : current.requiredDependencies) {
 			if (reqDep.isAsked && !reqDep.isAnswered) {
 				return reqDep;
+			}
+		}
+
+		return null;
+	}
+
+	private ConvContextNode getRootIntentNode(String intentToMatch) {
+
+		for (ConvContextNode reqdDep : conversationRoot.requiredDependencies) {
+			if ((reqdDep.intent != null) && (reqdDep.intent.equals(intentToMatch))) {
+				return reqdDep;
+			}
+		}
+
+		for (ConvContextNode optDep : conversationRoot.optionalDependencies) {
+			if ((optDep.intent != null) && (optDep.intent.equals(intentToMatch))) {
+				return optDep;
 			}
 		}
 

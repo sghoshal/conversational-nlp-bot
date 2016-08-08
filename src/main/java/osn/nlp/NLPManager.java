@@ -484,6 +484,7 @@ public class NLPManager {
 
 	private File getDirectoryObject (String path) {
 		System.out.println("Path to training data: " + path);
+
 		File trainingDirectory = new File(path);
 
 		if (!trainingDirectory.isDirectory()) {

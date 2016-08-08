@@ -5,7 +5,6 @@ import java.util.List;
 
 public class ClassificationInfo {
 	public String intent;
-
 	public List<String> entities;
 
 	public ClassificationInfo() {
@@ -14,9 +13,6 @@ public class ClassificationInfo {
 
 	@Override
 	public String toString() {
-		return "ClassificationInfo{" +
-			   "intent='" + intent + '\'' +
-			   ", entities=" + entities +
-			   '}';
+		return "[ Intent: '" + intent + "\t" + "Entities: " + entities + " ]";
 	}
 }

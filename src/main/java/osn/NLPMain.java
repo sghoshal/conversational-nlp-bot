@@ -2,9 +2,12 @@ package main.java.osn;
 
 import main.java.osn.conversation.ConvContextManager;
 import main.java.osn.conversation.ConvContextNode;
+import main.java.osn.info.ConvContextReplyInfo;
 import main.java.osn.nlp.NLPManager;
+import main.java.osn.utils.NLPUtils;
 
 import java.io.IOException;
+import java.util.*;
 
 /**
  * Entry class.
@@ -13,6 +16,7 @@ public class NLPMain {
 
 	/**
 	 * Create the intent dependency tree and seed it.
+	 *
 	 * @return
 	 */
 	private static ConvContextNode createConversationDependencies() {
@@ -49,7 +53,7 @@ public class NLPMain {
 		ConvContextNode updateProfile = new ConvContextNode(intentUpdateProfile, null, null, "Lets do it!");
 
 		ConvContextNode profileDescription = new ConvContextNode(intentUpdateProfile, "description", "description-id", "Ok, give me a short description about thy self");
-		ConvContextNode profileExpertise = new ConvContextNode(intentUpdateProfile, "expertise", "expertise-id", "Ok, what's your superpower (expertise). Can be 1 or many!");
+		ConvContextNode profileExpertise = new ConvContextNode(intentUpdateProfile, "expertise", "expertise-id", "Ok, what's your superpower. Can be 1 or many!");
 		ConvContextNode profileOrganization = new ConvContextNode(intentUpdateProfile, "org", "org-id", "What organization do you belong to?");
 
 		profileDescription.isEntityPlainText = true;
@@ -67,24 +71,8 @@ public class NLPMain {
 		return root;
 	}
 
-	/**
-	 * Main.
-	 *
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		NLPManager nlpManager = NLPManager.getInstance();
-
-		try {
-			nlpManager.train("res/train/intent", "res/train/entity");
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		ConvContextNode conversationRoot = createConversationDependencies();
-		ConvContextManager convContextManager = new ConvContextManager(nlpManager, conversationRoot);
-
+	private static void testExampleFlows(ConvContextManager convContextManager, NLPManager nlpManager)
+	{
 		// Test Conversation flow for Following users.
 
 		String userInput = "Can you recommend me users to follow";
@@ -135,39 +123,57 @@ public class NLPMain {
 		System.out.println("User asked: " + userInput);
 		System.out.println("Bot Reply: " + convContextManager.generateReply(userInput, "update-profile", "org-id"));
 		System.out.println("-----\n");
+	}
 
-//		// Add intents and classify new sentences.
-//
-//		replyInfo = nlpModule.parseUserChatToBot("I want to hear songs by Pearl Jam", null, null);
-//		System.out.println("Bot Reply: " + replyInfo);
-//
-//		Intent playMusicIntent = new Intent("play-music");
-//
-//		List<String> playMusicSentences = new ArrayList<String>();
-//
-//		playMusicSentences.add("Can you play <START:artist> Beatles <END>");
-//		playMusicSentences.add("I would like to listen to <START:artist> Pearl Jam <END>");
-//		playMusicSentences.add("Play <START:song> Hotel California <END> by <START:artist> Eagles <END>");
-//
-//		try
-//		{
-//			nlpModule.addTrainingData(playMusicIntent, playMusicSentences);
-//		}
-//		catch (IOException e)
-//		{
-//			e.printStackTrace();
-//		}
-//
-//		replyInfo = nlpModule.parseUserChatToBot("I want to hear songs by Pearl Jam", null, null);
-//		System.out.println("Bot Reply: " + replyInfo);
+	/**
+	 * Main.
+	 *
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		NLPManager nlpManager = NLPManager.getInstance();
 
+		try {
+			nlpManager.train( NLPManager.INTENT_TRAINING_DATA_DIR, NLPManager.ENTITY_TRAINING_DATA_DIR );
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 
-//		Map<Intent,LinkedHashSet<Entity>> intentEntitiesMap = nlpModule.getIntentRequiredEntities();
-//
-//		for (Intent xi : intentEntitiesMap.keySet())
-//		{
-//			Set<Entity> eSet = intentEntitiesMap.get(xi);
-//			System.out.println(String.format("[%s -> [%s]", xi, eSet));
-//		}
+		ConvContextNode conversationRoot = createConversationDependencies();
+		ConvContextManager convContextManager = new ConvContextManager(nlpManager, conversationRoot);
+
+		// testExampleFlows();
+
+		// Get the input from user.
+
+		Scanner scanner = new Scanner(System.in);
+		System.out.println("\nStart a chat with Bot.\n" +
+							"Enter Done to end current conversation.\n" +
+							"Enter Exit to end Chat with the bot completely.\n");
+
+		String cmdLineInput = "start";
+		ConvContextReplyInfo botReply;
+		String intent;
+		String entityToBeMatched;
+
+		while (!NLPUtils.isChatOver(cmdLineInput)) {
+			intent = null;
+			entityToBeMatched = null;
+			cmdLineInput = "start";
+
+			while (!NLPUtils.isConversationOver(cmdLineInput)) {
+				System.out.print("You: ");
+				cmdLineInput = scanner.nextLine();
+
+				botReply = convContextManager.generateReply(cmdLineInput, intent, entityToBeMatched);
+				intent = botReply.intent;
+				entityToBeMatched = botReply.entityIdToBeMatchedByUser;
+
+				System.out.println("BOT: " + botReply.reply + "\n");
+			}
+
+			System.out.println("Start a new conversation.");
+		}
 	}
 }
